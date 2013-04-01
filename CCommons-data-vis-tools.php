@@ -33,7 +33,10 @@ add_action('admin_print_styles', 'ccdvt_enqueue_admin_styles');
 function ccdvt_get_tools($category){
 //Only continue if the $category passed matches a real category slug
 	//Get an array of all categories
-	$categories = get_categories();
+	$args = array(
+		'taxonomy' => 'data_vis_tool_categories'
+	);
+	$categories = get_categories($args);
 	$all_cats = array();
 	foreach ($categories as $cat) {
 		$all_cats[] = $cat->slug;
@@ -53,7 +56,7 @@ function ccdvt_get_tools($category){
     $args =  array( 
 	'post_type' => 'data_vis_tool',
 	'posts_per_page' => $max_number_of_featured,
-	'category_name' => $category,
+	'data_vis_tool_categories' => $category,
 	'meta_query' => array(
 		array(
 			'key' => 'ccdvt_check_featured',
@@ -65,6 +68,12 @@ function ccdvt_get_tools($category){
 
 	$ccdtv_featured_tool = new WP_Query( $args );
 	if ( $ccdtv_featured_tool->have_posts() ) :
+
+		?>
+		<div id="data-vis-tool-group-<?= $category ?>" class="data-vis-tool-group">
+		<?php
+		//Since we've opened a div, set a variable so we close it when appropriate.
+		$close_tool_group_div = true;
 		
 		while ( $ccdtv_featured_tool->have_posts() ) : $ccdtv_featured_tool->the_post();
 			global $post;
@@ -72,16 +81,26 @@ function ccdvt_get_tools($category){
 			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : ''; 
 			$tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
 			$do_not_duplicate[] = $post->ID;
-			$cat_for_post = get_the_category();
-			if($cat_for_post){
-				foreach($cat_for_post as $cat_post) {
-					$cat_header .= $cat_post->cat_name;
+			// $cat_for_post = get_the_terms( $post->ID, 'data_vis_tool_categories' );
+			// print_r($cat_for_post);
+			// if($cat_for_post){
+			// 	foreach($cat_for_post as $term) {
+			// 		$cat_header .= $term->cat_name;
+			// 	}
+			// }
+			$terms = get_the_terms( $post->ID, 'data_vis_tool_categories' );
+						
+			if ( $terms && ! is_wp_error( $terms ) ) {
+				$data_vis_terms = array();
+				foreach ( $terms as $term ) {
+					$data_vis_terms[] = $term->name;
 				}
+				$cat_header = join( ", ", $data_vis_terms );
 			}
-	?>
+		?>
+		<header class="section-header"><h1><?php echo $cat_header;	?></h1>
+		</header>
 		<div class="featured-data-vis-tool clear <?=$category?>">
-			<header class="section-header"><h1><?php echo $cat_header;	?></h1>
-			</header>
 			<div class="widget-container">
 			<?php echo $tool_widget; ?>
 			</div>
@@ -106,7 +125,7 @@ function ccdvt_get_tools($category){
     $args =  array( 
 	'post_type' => 'data_vis_tool',
 	// 'posts_per_page' => $max_number_of_featured,
-	'category_name' => $category,
+	'data_vis_tool_categories' => $category,
 	'post__not_in' => $do_not_duplicate,
 	);
 
@@ -131,7 +150,11 @@ function ccdvt_get_tools($category){
 	<?php
 	endwhile;		
 	wp_reset_query();
-    endif;  		
+    endif;
+    if ($close_tool_group_div) {
+    	echo '</div><!-- End data-vis-tool-group -->';  
+    }
+
 } //end ccdvt_get_tools
 
 
