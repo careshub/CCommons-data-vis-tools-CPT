@@ -70,7 +70,7 @@ function ccdvt_get_tools($category){
 	if ( $ccdtv_featured_tool->have_posts() ) :
 
 		?>
-		<div id="data-vis-tool-group-<?= $category ?>" class="data-vis-tool-group">
+		<div id="data-vis-tool-group-<?php echo $category; ?>" class="data-vis-tool-group">
 		<?php
 		//Since we've opened a div, set a variable so we close it when appropriate.
 		$close_tool_group_div = true;
@@ -100,7 +100,7 @@ function ccdvt_get_tools($category){
 		?>
 		<header class="section-header"><h1><?php echo $cat_header;	?></h1>
 		</header>
-		<div class="featured-data-vis-tool clear <?=$category?>">
+		<div class="featured-data-vis-tool clear <?echo $category; ?>">
 			<div class="widget-container">
 			<?php echo $tool_widget; ?>
 			</div>
@@ -139,7 +139,7 @@ function ccdvt_get_tools($category){
 			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
 			$do_not_duplicate[] = $post->ID;
 	?>
-		<div class="data-vis-tool quarter-block <?=$category?>">
+		<div class="data-vis-tool quarter-block <?php echo $category; ?>">
 			<header class="entry-header">
 				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
 			</header>
