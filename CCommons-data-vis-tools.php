@@ -246,7 +246,7 @@ function ccdvt_edit_columns($columns){
 $columns = array(
 	'cb' => '<input type="checkbox" />',
 	'title' => __( 'Title' ),
-    'categories' => __( 'Categories' ),
+    'data_vis_tool_categories' => __( 'Categories' ),
     'featured' => __( 'Featured' ),
     'date' => __( 'Date' )
     );
@@ -263,6 +263,19 @@ function ccdvt_custom_columns($column){
 				$check_sticky = isset( $values['ccdvt_check_featured'] ) ? esc_attr( $values['ccdvt_check_featured'][0] ) : '';
 				$sticky_status = ( $check_sticky == 'on' ) ? 'Featured' : '';
 				echo $sticky_status;              
+				break;
+			case "data_vis_tool_categories":
+				$terms = get_the_terms( get_the_id(), 'data_vis_tool_categories' );
+						
+				if ( $terms && ! is_wp_error( $terms ) ) {
+					$data_vis_terms = array();
+					foreach ( $terms as $term ) {
+						$data_vis_terms[] = $term->name;
+					}
+					$cat_header = join( ", ", $data_vis_terms );
+					echo $cat_header;
+				}
+				              
 				break;
         }
 }  
