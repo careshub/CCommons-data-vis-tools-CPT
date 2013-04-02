@@ -26,7 +26,7 @@ function register_cpt_data_vis_tool() {
         'hierarchical' => false,
         'description' => 'Used to add tools to the data vis page.',
         'supports' => array( 'title', 'editor' ),
-        'taxonomies' => array( 'category','data_vis_tool_categories' ),
+        'taxonomies' => array( 'data_vis_tool_categories' ),
         'public' => true,
         'show_ui' => true,
         'show_in_menu' => true,
