@@ -68,6 +68,10 @@ function ccdvt_get_tools($category){
 
 	$ccdtv_featured_tool = new WP_Query( $args );
 	if ( $ccdtv_featured_tool->have_posts() ) :
+		$cat_object = get_term_by('name', $category, 'data_vis_tool_categories');
+		// print_r($cat_object);
+		$section_title = $cat_object->name;
+		$section_description = $cat_object->description;
 
 		?>
 		<div id="data-vis-tool-group-<?php echo $category; ?>" class="data-vis-tool-group">
@@ -79,8 +83,8 @@ function ccdvt_get_tools($category){
 			global $post;
 			$values = get_post_custom( $post->ID );
 			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : ''; 
-			$tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
-			$do_not_duplicate[] = $post->ID;
+			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
+			// $do_not_duplicate[] = $post->ID;
 			// $cat_for_post = get_the_terms( $post->ID, 'data_vis_tool_categories' );
 			// print_r($cat_for_post);
 			// if($cat_for_post){
@@ -88,21 +92,61 @@ function ccdvt_get_tools($category){
 			// 		$cat_header .= $term->cat_name;
 			// 	}
 			// }
-			$terms = get_the_terms( $post->ID, 'data_vis_tool_categories' );
+			// $terms = get_the_terms( $post->ID, 'data_vis_tool_categories' );
 						
-			if ( $terms && ! is_wp_error( $terms ) ) {
-				$data_vis_terms = array();
-				foreach ( $terms as $term ) {
-					$data_vis_terms[] = $term->name;
-				}
-				$cat_header = join( ", ", $data_vis_terms );
-			}
+			// if ( $terms && ! is_wp_error( $terms ) ) {
+			// 	$data_vis_terms = array();
+			// 	foreach ( $terms as $term ) {
+			// 		$data_vis_terms[] = $term->name;
+			// 	}
+			// 	$cat_header = join( ", ", $data_vis_terms );
+			// }
 		?>
-		<header class="section-header"><h1><?php echo $cat_header;	?></h1>
+		<header class="entry-header">
+			<h1 class="entry-title"><?php echo $section_title;	?></h1>
+			<?php 
+							// Array to pass to get_terms as the second param
+							// This is the array that get_terms expects
+							$term_args = array(
+							    // 'orderby'       => 'name', 
+							    // 'order'         => 'ASC',
+							    // 'hide_empty'    => true, 
+							    // 'exclude'       => array(), 
+							    // 'exclude_tree'  => array(), 
+							    // 'include'       => array(),
+							    // 'number'        => , 
+							    // 'fields'        => 'all', 
+							    'slug'          => $category, 
+							    // 'parent'         => ,
+							    // 'hierarchical'  => true, 
+							    // 'child_of'      => 0, 
+							    // 'get'           => , 
+							    // 'name__like'    => ,
+							    // 'pad_counts'    => false, 
+							    // 'offset'        => , 
+							    // 'search'        => , 
+							    // 'cache_domain'  => 'core'
+							); 
+							//Put them all together for the Taxonomy Images plugin
+							$combined_term_args = array(
+								'term_args' => $term_args,
+								'taxonomy' => 'data_vis_tool_categories'
+								);
+				
+				?>
+			<p class="data-vis-tool-description">
+				<?php $terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args ); ?>
+				<?php 
+				//print_r($terms); 
+				// echo 'Image ID: ' . $terms[0]->image_id; 
+				?>
+				<?php echo wp_get_attachment_image( $terms[0]->image_id, 'feature-front' ) ?>
+				<?php echo $section_description; ?>
+			</p>
 		</header>
 		<div class="featured-data-vis-tool clear <?echo $category; ?>">
 			<div class="widget-container">
-			<?php echo $tool_widget; ?>
+			<?php //echo $tool_widget; ?>
 			</div>
 			<header class="entry-header">
 				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>

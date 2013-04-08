@@ -30,7 +30,7 @@ function register_cpt_data_vis_tool() {
         'public' => true,
         'show_ui' => true,
         'show_in_menu' => true,
-        'menu_position' => 27,
+        'menu_position' => 57,
         'show_in_nav_menus' => false,
         'publicly_queryable' => true,
         'exclude_from_search' => false,
