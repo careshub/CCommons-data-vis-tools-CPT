@@ -94,7 +94,7 @@ function ccdvt_get_tools($category){
 								);
 				
 				?>
-			<div id="data-vis-header-<?php echo $category; ?>" class="clear">
+			<div id="data-vis-header-<?php echo $category; ?>" class="data-vis-header clear">
 				<?php $terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args ); ?>
 				<?php 
 				// print_r($terms); 
