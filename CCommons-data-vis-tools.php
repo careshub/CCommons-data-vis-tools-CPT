@@ -22,12 +22,12 @@ function ccdvt_enqueue_scripts() {
 // wp_enqueue_script('flexslider', EFS_PATH.'jquery.flexslider-min.js', array('jquery'));
 // wp_enqueue_style('ccommons_flexslider_css', EFS_PATH.'ccommons-flexslider.css');
 }
-add_action('wp_enqueue_scripts', 'ccdvt_enqueue_scripts');
+// add_action('wp_enqueue_scripts', 'ccdvt_enqueue_scripts');
 
 function ccdvt_enqueue_admin_styles() {
 // wp_enqueue_style('ccommons_flexslider_admin_css', EFS_PATH.'ccommons-flexslider-admin.css');
 }
-add_action('admin_print_styles', 'ccdvt_enqueue_admin_styles');
+// add_action('admin_print_styles', 'ccdvt_enqueue_admin_styles');
 
 
 function ccdvt_get_tools($category){
@@ -128,7 +128,9 @@ function ccdvt_get_tools($category){
 		while ( $ccdtv_featured_tool->have_posts() ) : $ccdtv_featured_tool->the_post();
 			global $post;
 			$values = get_post_custom( $post->ID );
-			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : ''; 
+			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
+			$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
+
 			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
 			// $do_not_duplicate[] = $post->ID;
 			// $cat_for_post = get_the_terms( $post->ID, 'data_vis_tool_categories' );
@@ -149,7 +151,8 @@ function ccdvt_get_tools($category){
 			// }
 		?>
 		<div class="data-vis-tool quarter-block <?php echo $category; ?>">
-			<header class="entry-header">
+			<header class="entry-header clear">
+				<span class="<?php echo $tool_type . 'x24'; ?>"></span>
 				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
 			</header>
 			<div class="entry-content">
@@ -188,12 +191,14 @@ function ccdvt_get_tools($category){
 		while ( $ccdtv_tools->have_posts() ) : $ccdtv_tools->the_post();
 			global $post;
 			$values = get_post_custom( $post->ID );
-			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : ''; 
+			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
+			$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
 			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
 			$do_not_duplicate[] = $post->ID;
 	?>
 		<div class="data-vis-tool quarter-block <?php echo $category; ?>">
-			<header class="entry-header">
+			<header class="entry-header clear">
+				<span class="<?php echo $tool_type . 'x24'; ?>"></span>
 				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
 			</header>
 			<div class="entry-content">
@@ -223,13 +228,13 @@ function data_vis_tool_meta_box( $post )
 	$link = isset( $values['ccdvt_link'] ) ? esc_attr( $values['ccdvt_link'][0] ) : '';
 	$widget = isset( $values['ccdvt_widget'] ) ? esc_attr( $values['ccdvt_widget'][0] ) : '';
 	$check_featured = isset( $values['ccdvt_check_featured'] ) ? esc_attr( $values['ccdvt_check_featured'][0] ) : '';
+	$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
 	wp_nonce_field( 'data-vis-tool-meta-box', 'meta_box_nonce' );
 	?>
 
-	<h4 style="margin:0;">Feature this tool in its category group</h4>
 	<p style="margin-top:.2em;">
 		<input type="checkbox" name="ccdvt_check_featured" id="ccdvt_check_featured" <?php checked( $check_featured, 'on' ); ?> />
-		<label for="ccdvt_check_featured">Featured</label>
+		<label for="ccdvt_check_featured">Feature this tool in its category group</label>
 	</p>
 	<p style="margin-top:2em;">
 		<label for="ccdvt_link">Link to open map</label>
@@ -241,6 +246,12 @@ function data_vis_tool_meta_box( $post )
 		<input type="text" name="ccdvt_widget" id="ccdvt_widget" value="<?php echo $widget; ?>" style="width:100%"/>
 		<em>This value should look like &lt;script&gt;... </em>
 	</p>
+	<fieldset style="margin-top:2em;">
+		<legend style="margin-bottom:.5em">Type of tool</legend>
+		<input type="radio" name="ccdvt_tool_type" id="ccdvt_tool_type_map" value="map"<?php checked( 'map' == $tool_type); ?> /><label for="ccdvt_tool_type_map">Map </label><br />
+		<input type="radio" name="ccdvt_tool_type" id="ccdvt_tool_type_report" value="report"<?php checked( 'report' == $tool_type); ?> /><label for="ccdvt_tool_type_report">Report </label><br />
+		<input type="radio" name="ccdvt_tool_type" id="ccdvt_tool_type_collaboration" value="collaboration"<?php checked( 'collaboration' == $tool_type); ?> /><label for="ccdvt_tool_type_collaboration">Collaborative tool </label>
+	</fieldset>
 		<?php	
 }
 
@@ -272,7 +283,7 @@ function data_vis_tool_meta_box_save( $post_id )
 			'src' =>array()
 			)
 	);
-	
+
 	// Probably a good idea to make sure your data is set
 	if( isset( $_POST['ccdvt_link'] ) )
 		update_post_meta( $post_id, 'ccdvt_link', esc_url( $_POST['ccdvt_link'] ) );
@@ -285,6 +296,12 @@ function data_vis_tool_meta_box_save( $post_id )
 	// Saving checkboxes
 	$chk = ( isset( $_POST['ccdvt_check_featured'] ) && $_POST['ccdvt_check_featured'] ) ? 'on' : 'off';
 	update_post_meta( $post_id, 'ccdvt_check_featured', $chk );
+
+	//Saving radio buttons
+    $allowed_radio_options = array('map','report','collaboration');
+
+    if( isset( $_POST['ccdvt_tool_type'] ) && in_array($_POST['ccdvt_tool_type'], $allowed_radio_options))
+        update_post_meta( $post_id, 'ccdvt_tool_type',  $_POST['ccdvt_tool_type'] );
 }
 
 function data_vis_table_display() {
@@ -331,8 +348,4 @@ function ccdvt_custom_columns($column){
 				              
 				break;
         }
-}  
-
-
-
-?>
+}
