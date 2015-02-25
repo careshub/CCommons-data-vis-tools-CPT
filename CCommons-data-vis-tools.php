@@ -5,13 +5,13 @@ Plugin Name: Community Commons Data Vis Tools CPT
 Plugin URI: 
 Description: Creates and enables Data Vis Tools for Community Commons
 Author: David Cavins
-Version: 0.1
+Version: 0.2
 */
 
 /*Some Set-up*/
 define( 'CCDVT_PATH', plugin_dir_url( __FILE__ ) );
 define('CCDVT_NAME', "Community Commons Data Vis Tools CPT");
-define ("CCDVT_VERSION", "0.1");
+define ("CCDVT_VERSION", "0.2");
 
 /*Files to Include*/
 // Definition of custom post type
@@ -30,190 +30,132 @@ function ccdvt_enqueue_admin_styles() {
 // add_action('admin_print_styles', 'ccdvt_enqueue_admin_styles');
 
 
-function ccdvt_get_tools($category){
-//Only continue if the $category passed matches a real category slug
+function ccdvt_get_tools() {
 	//Get an array of all categories
 	$args = array(
 		'taxonomy' => 'data_vis_tool_categories'
 	);
-	$categories = get_categories($args);
-	$all_cats = array();
-	foreach ($categories as $cat) {
-		$all_cats[] = $cat->slug;
-	}
-	//If the requested category doesn't exist, bail.
-	if ( !in_array($category, $all_cats) )
-		return;
+	$categories = get_categories( $args );
 
 	// Set up an array to remember the posts we've already used.
 	$do_not_duplicate = array();
 
 	$ccdtv_tool_group = '';
 
-	// Build the section header
-	$cat_object = get_term_by('slug', $category, 'data_vis_tool_categories');
-		// print_r($cat_object);
-		$section_title = $cat_object->name;
-		$section_description = $cat_object->description;
+	foreach ( $categories as $cat ) {
+		//What color should this block be?
+		// New terms: economics, education, environment, equity, food, health
+		switch ( $cat->slug ) {
+			case 'community-context':
+			case 'education':
+			case 'equity': // Replaces "community context"
+				$color = 'accent-yellow';
+				break;
+			case 'economics':
+				$color = 'accent-green';
+				break;
+			case 'environment':
+			case 'health-2':
+			case 'health':
+				$color = 'accent-blue';
+				break;
+			case 'food':
+				$color = 'accent-red';
+				break;
+			default:
+				$color = 'acccent-blue';
+				break;
+		}
 
 		?>
-		<div id="data-vis-tool-group-<?php echo $category; ?>" class="data-vis-tool-group">
-		<?php
-		//Since we've opened a div, set a variable so we close it when appropriate.
-		$close_tool_group_div = true;
-		?>
-		<header class="entry-header clear">
-			<h1 class="entry-title"><?php echo $section_title;	?></h1>
-			<?php 
-							// Array to pass to get_terms as the second param
-							// This is the array that get_terms expects
-							$term_args = array(
-							    // 'orderby'       => 'name', 
-							    // 'order'         => 'ASC',
-							    // 'hide_empty'    => true, 
-							    // 'exclude'       => array(), 
-							    // 'exclude_tree'  => array(), 
-							    // 'include'       => array(),
-							    // 'number'        => , 
-							    // 'fields'        => 'all', 
-							    'slug'          => $category, 
-							    // 'parent'         => ,
-							    // 'hierarchical'  => true, 
-							    // 'child_of'      => 0, 
-							    // 'get'           => , 
-							    // 'name__like'    => ,
-							    // 'pad_counts'    => false, 
-							    // 'offset'        => , 
-							    // 'search'        => , 
-							    // 'cache_domain'  => 'core'
-							); 
-							//Put them all together for the Taxonomy Images plugin
-							$combined_term_args = array(
-								'term_args' => $term_args,
-								'taxonomy' => 'data_vis_tool_categories'
-								);
-				
-				?>
-			<div id="data-vis-header-<?php echo $category; ?>" class="data-vis-header clear">
-				<?php $terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args ); ?>
+		<div id="<?php echo $cat->slug; ?>" class="tool-group <?php echo $color; ?>">
+			<header class="entry-header clear">
+				<h1 class="entry-title"><?php echo $cat->name;	?></h1>
 				<?php 
-				// print_r($terms); 
-				// echo 'Image ID: ' . $terms[0]->image_id; 
-				?>
-				<?php echo wp_get_attachment_image( $terms[0]->image_id, 'full' ) ?>
-				<p class="data-vis-tool-description">
-					<?php echo $section_description; ?>
-				</p>
-			</div>
-		</header>
-	<?php
-	//Get the featured tools for a category
-
-    $args =  array( 
-	'post_type' => 'data_vis_tool',
-	// 'posts_per_page' => $max_number_of_featured,
-	'data_vis_tool_categories' => $category,
-	'meta_query' => array(
-		array(
-			'key' => 'ccdvt_check_featured',
-			'value' => 'on',
-			'compare' => '=',
-			)
-		)
-	);
-
-	$ccdtv_featured_tool = new WP_Query( $args );
-	if ( $ccdtv_featured_tool->have_posts() ) :
-		
-		while ( $ccdtv_featured_tool->have_posts() ) : $ccdtv_featured_tool->the_post();
-			global $post;
-			$values = get_post_custom( $post->ID );
-			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
-			$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
-
-			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
-			// $do_not_duplicate[] = $post->ID;
-			// $cat_for_post = get_the_terms( $post->ID, 'data_vis_tool_categories' );
-			// print_r($cat_for_post);
-			// if($cat_for_post){
-			// 	foreach($cat_for_post as $term) {
-			// 		$cat_header .= $term->cat_name;
-			// 	}
-			// }
-			// $terms = get_the_terms( $post->ID, 'data_vis_tool_categories' );
-						
-			// if ( $terms && ! is_wp_error( $terms ) ) {
-			// 	$data_vis_terms = array();
-			// 	foreach ( $terms as $term ) {
-			// 		$data_vis_terms[] = $term->name;
-			// 	}
-			// 	$cat_header = join( ", ", $data_vis_terms );
-			// }
-		?>
-		<div class="data-vis-tool quarter-block <?php echo $category; ?>">
-			<header class="entry-header clear">
-				<span class="<?php echo $tool_type . 'x24'; ?>"></span>
-				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
+					//Put them all together for the Taxonomy Images plugin
+					$combined_term_args = array(
+						'term_args' => array( 'slug' => $cat->slug ),
+						'taxonomy' => 'data_vis_tool_categories'
+						);
+					?>
+				<div class="tool-group-header clear">
+					<?php 
+					$terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args );  
+					if ( ! empty( $terms ) ) {
+						echo wp_get_attachment_image( current( $terms )->image_id, 'full' );
+					}
+					?>
+					<p class="data-vis-tool-description">
+						<?php echo $cat->description; ?>
+					</p>
+				</div>
 			</header>
-			<div class="entry-content">
-			<?php the_content(); ?>
-			<?php $do_not_duplicate[] = $post->ID; ?>
-			</div>
-		</div>
-		<!-- <div class="featured-data-vis-tool clear <?echo $category; ?>">
-			<div class="widget-container">
-			<?php //echo $tool_widget; ?>
-			</div>
-			<header class="entry-header">
-				<h3 class="entry-title"><a href="<?php //echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php //the_title(); ?></a></h3>
-			</header>
-			<div class="entry-content">
-			<?php //the_content(); ?>
-			</div>
-		</div> -->
-	<?php
-	endwhile;		
-	wp_reset_query();
-    endif;
+			<?php
+			//Get the featured tools for a category
 
-	//Next, get the other tools in the category
+		    $featured_args =  array( 
+				'post_type' => 'data_vis_tool',
+				// 'posts_per_page' => $max_number_of_featured,
+				'data_vis_tool_categories' => $cat->slug,
+				'meta_query' => array(
+					array(
+						'key' => 'ccdvt_check_featured',
+						'value' => 'on',
+						'compare' => '=',
+						)
+					)
+				);
 
-    $args =  array( 
-	'post_type' => 'data_vis_tool',
-	// 'posts_per_page' => $max_number_of_featured,
-	'data_vis_tool_categories' => $category,
-	'post__not_in' => $do_not_duplicate,
-	);
+			$ccdtv_featured_tool = new WP_Query( $featured_args );
+			if ( $ccdtv_featured_tool->have_posts() ) :		
+				while ( $ccdtv_featured_tool->have_posts() ) : $ccdtv_featured_tool->the_post();
+					global $post;
+					$do_not_duplicate[] = $post->ID;
+					ccdvt_the_dvt_item( $post );
+				endwhile;		
+			wp_reset_query();
+		    endif;
 
-	$ccdtv_tools = new WP_Query( $args );
-	if ( $ccdtv_tools->have_posts() ) :
-		
-		while ( $ccdtv_tools->have_posts() ) : $ccdtv_tools->the_post();
-			global $post;
-			$values = get_post_custom( $post->ID );
-			$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
-			$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
-			// $tool_widget = isset( $values['ccdvt_widget'] ) ? ( $values['ccdvt_widget'][0] ) : '';
-			$do_not_duplicate[] = $post->ID;
-	?>
-		<div class="data-vis-tool quarter-block <?php echo $category; ?>">
-			<header class="entry-header clear">
-				<span class="<?php echo $tool_type . 'x24'; ?>"></span>
-				<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
-			</header>
-			<div class="entry-content">
-			<?php the_content(); ?>
-			</div>
-		</div>
-	<?php
-	endwhile;		
-	wp_reset_query();
-    endif;
-    if ($close_tool_group_div) {
-    	echo '</div><!-- End data-vis-tool-group -->';  
+			//Next, get the other tools in the category
+		    $args =  array( 
+				'post_type' => 'data_vis_tool',
+				// 'posts_per_page' => $max_number_of_featured,
+				'data_vis_tool_categories' => $cat->slug,
+				'post__not_in' => $do_not_duplicate,
+				);
+
+			$ccdtv_tools = new WP_Query( $args );
+			if ( $ccdtv_tools->have_posts() ) :			
+				while ( $ccdtv_tools->have_posts() ) : $ccdtv_tools->the_post();
+					global $post;
+					$do_not_duplicate[] = $post->ID;
+					ccdvt_the_dvt_item( $post );
+				endwhile;		
+			wp_reset_query();
+		    endif;
+	    	?>
+	    </div><!-- End data-vis-tool-group -->
+    <?php  
     }
 
 } //end ccdvt_get_tools
+
+function ccdvt_the_dvt_item( $post ){
+	$values = get_post_custom( $post->ID );
+	$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
+	$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
+	?>
+	<div class="data-vis-tool quarter-block <?php echo $cat->slug; ?>">
+		<header class="entry-header clear">
+			<span class="icon <?php echo $tool_type . 'x24'; ?>"></span>
+			<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
+		</header>
+		<div class="entry-content">
+		<?php the_content(); ?>
+		</div>
+	</div>
+	<?php 
+}
 
 
 /** Admin UI Area *************************************/
