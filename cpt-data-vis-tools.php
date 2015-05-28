@@ -6,7 +6,7 @@ add_action( 'init', 'register_cpt_data_vis_tool' );
 
 function register_cpt_data_vis_tool() {
 
-    $labels = array( 
+    $labels = array(
         'name' => _x( 'Data Vis Tools', 'data_vis_tool' ),
         'singular_name' => _x( 'Data Vis Tool', 'data_vis_tool' ),
         'add_new' => _x( 'Add New', 'data_vis_tool' ),
@@ -21,7 +21,7 @@ function register_cpt_data_vis_tool() {
         'menu_name' => _x( 'Data Vis Tools', 'data_vis_tool' ),
     );
 
-    $args = array( 
+    $args = array(
         'labels' => $labels,
         'hierarchical' => false,
         'description' => 'Used to add tools to the data vis page.',
@@ -30,7 +30,7 @@ function register_cpt_data_vis_tool() {
         'public' => true,
         'show_ui' => true,
         'show_in_menu' => true,
-        'menu_position' => 57,
+        'menu_position' => 49,
         'show_in_nav_menus' => false,
         'publicly_queryable' => true,
         'exclude_from_search' => false,
@@ -50,7 +50,7 @@ add_action( 'init', 'register_taxonomy_data_vis_tool_categories' );
 
 function register_taxonomy_data_vis_tool_categories() {
 
-    $labels = array( 
+    $labels = array(
         'name' => _x( 'Data Vis Tool Categories', 'data_vis_tool_categories' ),
         'singular_name' => _x( 'Data Vis Tool Category', 'data_vis_tool_categories' ),
         'search_items' => _x( 'Search Data Vis Tool Categories', 'data_vis_tool_categories' ),
@@ -68,7 +68,7 @@ function register_taxonomy_data_vis_tool_categories() {
         'menu_name' => _x( 'Data Vis Tool Categories', 'data_vis_tool_categories' ),
     );
 
-    $args = array( 
+    $args = array(
         'labels' => $labels,
         'public' => true,
         'show_in_nav_menus' => true,
