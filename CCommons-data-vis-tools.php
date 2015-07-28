@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Community Commons Data Vis Tools CPT
-Plugin URI: 
+Plugin URI:
 Description: Creates and enables Data Vis Tools for Community Commons
 Author: David Cavins
 Version: 0.2
@@ -71,7 +71,7 @@ function ccdvt_get_tools() {
 		<div id="<?php echo $cat->slug; ?>" class="tool-group <?php echo $color; ?>">
 			<header class="entry-header clear">
 				<h1 class="entry-title"><?php echo $cat->name;	?></h1>
-				<?php 
+				<?php
 					//Put them all together for the Taxonomy Images plugin
 					$combined_term_args = array(
 						'term_args' => array( 'slug' => $cat->slug ),
@@ -79,8 +79,8 @@ function ccdvt_get_tools() {
 						);
 					?>
 				<div class="tool-group-header clear">
-					<?php 
-					$terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args );  
+					<?php
+					$terms = apply_filters( 'taxonomy-images-get-terms', '', $combined_term_args );
 					if ( ! empty( $terms ) ) {
 						echo wp_get_attachment_image( current( $terms )->image_id, 'full' );
 					}
@@ -93,7 +93,7 @@ function ccdvt_get_tools() {
 			<?php
 			//Get the featured tools for a category
 
-		    $featured_args =  array( 
+		    $featured_args =  array(
 				'post_type' => 'data_vis_tool',
 				// 'posts_per_page' => $max_number_of_featured,
 				'data_vis_tool_categories' => $cat->slug,
@@ -107,17 +107,17 @@ function ccdvt_get_tools() {
 				);
 
 			$ccdtv_featured_tool = new WP_Query( $featured_args );
-			if ( $ccdtv_featured_tool->have_posts() ) :		
+			if ( $ccdtv_featured_tool->have_posts() ) :
 				while ( $ccdtv_featured_tool->have_posts() ) : $ccdtv_featured_tool->the_post();
 					global $post;
 					$do_not_duplicate[] = $post->ID;
 					ccdvt_the_dvt_item( $post );
-				endwhile;		
+				endwhile;
 			wp_reset_query();
 		    endif;
 
 			//Next, get the other tools in the category
-		    $args =  array( 
+		    $args =  array(
 				'post_type' => 'data_vis_tool',
 				// 'posts_per_page' => $max_number_of_featured,
 				'data_vis_tool_categories' => $cat->slug,
@@ -125,17 +125,17 @@ function ccdvt_get_tools() {
 				);
 
 			$ccdtv_tools = new WP_Query( $args );
-			if ( $ccdtv_tools->have_posts() ) :			
+			if ( $ccdtv_tools->have_posts() ) :
 				while ( $ccdtv_tools->have_posts() ) : $ccdtv_tools->the_post();
 					global $post;
 					$do_not_duplicate[] = $post->ID;
 					ccdvt_the_dvt_item( $post );
-				endwhile;		
+				endwhile;
 			wp_reset_query();
 		    endif;
 	    	?>
 	    </div><!-- End data-vis-tool-group -->
-    <?php  
+    <?php
     }
 
 } //end ccdvt_get_tools
@@ -154,7 +154,7 @@ function ccdvt_the_dvt_item( $post ){
 		<?php the_content(); ?>
 		</div>
 	</div>
-	<?php 
+	<?php
 }
 
 
@@ -194,7 +194,7 @@ function data_vis_tool_meta_box( $post )
 		<input type="radio" name="ccdvt_tool_type" id="ccdvt_tool_type_report" value="report"<?php checked( 'report' == $tool_type); ?> /><label for="ccdvt_tool_type_report">Report </label><br />
 		<input type="radio" name="ccdvt_tool_type" id="ccdvt_tool_type_collaboration" value="collaboration"<?php checked( 'collaboration' == $tool_type); ?> /><label for="ccdvt_tool_type_collaboration">Collaborative tool </label>
 	</fieldset>
-		<?php	
+		<?php
 }
 
 
@@ -202,19 +202,19 @@ add_action( 'save_post', 'data_vis_tool_meta_box_save' );
 function data_vis_tool_meta_box_save( $post_id )
 {
 	// // Bail if we're doing an auto save
-	if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
+	if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 		return;
-// 	
+//
 	// // if our nonce isn't there, or we can't verify it, bail
-	if( !isset( $_POST['meta_box_nonce'] ) || !wp_verify_nonce( $_POST['meta_box_nonce'], 'data-vis-tool-meta-box' ) ) 
+	if( !isset( $_POST['meta_box_nonce'] ) || !wp_verify_nonce( $_POST['meta_box_nonce'], 'data-vis-tool-meta-box' ) )
 		return;
-	
+
 	// if our current user can't edit this post, bail
-	if( !current_user_can( 'edit_post' ) ) 
+	if( !current_user_can( 'edit_post' ) )
 		return;
-	
+
 	// now we can actually save the data
-	$allowed = array( 
+	$allowed = array(
 		'a' => array( // only allow a tags
 			'href' => array() // and those anchors can only have href attribute
 		),
@@ -230,11 +230,11 @@ function data_vis_tool_meta_box_save( $post_id )
 	if( isset( $_POST['ccdvt_link'] ) )
 		update_post_meta( $post_id, 'ccdvt_link', esc_url( $_POST['ccdvt_link'] ) );
 	if( isset( $_POST['ccdvt_widget'] ) )
-		update_post_meta( $post_id, 'ccdvt_widget', $_POST['ccdvt_widget'] );		
+		update_post_meta( $post_id, 'ccdvt_widget', $_POST['ccdvt_widget'] );
 	/*if( isset( $_POST['my_meta_box_select'] ) )
 		update_post_meta( $post_id, 'my_meta_box_select', esc_attr( $_POST['my_meta_box_select'] ) );
 		*/
-		
+
 	// Saving checkboxes
 	$chk = ( isset( $_POST['ccdvt_check_featured'] ) && $_POST['ccdvt_check_featured'] ) ? 'on' : 'off';
 	update_post_meta( $post_id, 'ccdvt_check_featured', $chk );
@@ -274,11 +274,11 @@ function ccdvt_custom_columns($column){
             case "featured":
 				$check_sticky = isset( $values['ccdvt_check_featured'] ) ? esc_attr( $values['ccdvt_check_featured'][0] ) : '';
 				$sticky_status = ( $check_sticky == 'on' ) ? 'Featured' : '';
-				echo $sticky_status;              
+				echo $sticky_status;
 				break;
 			case "data_vis_tool_categories":
 				$terms = get_the_terms( get_the_id(), 'data_vis_tool_categories' );
-						
+
 				if ( $terms && ! is_wp_error( $terms ) ) {
 					$data_vis_terms = array();
 					foreach ( $terms as $term ) {
@@ -287,7 +287,7 @@ function ccdvt_custom_columns($column){
 					$cat_header = join( ", ", $data_vis_terms );
 					echo $cat_header;
 				}
-				              
+
 				break;
         }
 }
