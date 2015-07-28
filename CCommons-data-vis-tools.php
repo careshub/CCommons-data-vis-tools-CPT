@@ -145,7 +145,7 @@ function ccdvt_the_dvt_item( $post ){
 	$tool_link = isset( $values['ccdvt_link'] ) ? ( $values['ccdvt_link'][0] ) : '';
 	$tool_type = isset( $values['ccdvt_tool_type'] ) ? esc_attr( $values['ccdvt_tool_type'][0] ) : '';
 	?>
-	<div class="data-vis-tool quarter-block <?php echo $cat->slug; ?>">
+	<div class="data-vis-tool quarter-block <?php echo $tool_type; ?>">
 		<header class="entry-header clear">
 			<span class="icon <?php echo $tool_type . 'x24'; ?>"></span>
 			<h3 class="entry-title"><a href="<?php echo $tool_link; ?>" title="Link to the map tool" rel="bookmark"><?php the_title(); ?></a></h3>
